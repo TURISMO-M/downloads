@@ -39,15 +39,20 @@ const RELEASE_CATALOG = [
     platform: 'macOS',
     platformKey: 'macos',
     arch: 'Apple Silicon (arm64)',
-    format: 'Mach-O Binary',
-    mimeType: 'application/octet-stream',
+    format: '.dmg',
+    mimeType: 'application/x-apple-diskimage',
     filePaths: [
-      path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_macOS')
+      path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_macOS.dmg')
     ],
-    downloadName: 'Stock_Manager_1-0_macOS',
-    downloadUrl: 'Stock_Manager/Stock_Manager_1-0_macOS',
-    legacyRoutes: ['/downloads/stock-manager/macos', '/stock_manager/Stock_Manager_1-0_macOS'],
-    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock_Manager_1-0_macOS`
+    downloadName: 'Stock_Manager_1-0_macOS.dmg',
+    downloadUrl: 'Stock_Manager/Stock_Manager_1-0_macOS.dmg',
+    legacyRoutes: [
+      '/downloads/stock-manager/macos',
+      '/stock_manager/Stock_Manager_1-0_macOS.dmg',
+      '/Stock_Manager/Stock_Manager_1-0_macOS',
+      '/stock_manager/Stock_Manager_1-0_macOS'
+    ],
+    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock_Manager_1-0_macOS.dmg`
   },
   {
     id: 'stock-manager-linux',

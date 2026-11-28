@@ -14,7 +14,7 @@
       format: '.exe',
       filename: 'Stock_Manager_1-0_Windows.exe',
       downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Windows.exe',
-      sizeFormatted: '1.26 MB',
+      sizeFormatted: '1.31 MB',
       sha256: null,
       available: true
     },
@@ -27,10 +27,10 @@
       platform: 'macOS',
       platformKey: 'macos',
       arch: 'Apple Silicon (arm64)',
-      format: 'Mach-O Binary',
-      filename: 'Stock_Manager_1-0_macOS',
-      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_macOS',
-      sizeFormatted: '1.33 MB',
+      format: '.dmg',
+      filename: 'Stock_Manager_1-0_macOS.dmg',
+      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_macOS.dmg',
+      sizeFormatted: '982.4 KB',
       sha256: null,
       available: true
     },
@@ -46,7 +46,7 @@
       format: 'ELF Executable',
       filename: 'Stock_Manager_1-0_Linux',
       downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Linux',
-      sizeFormatted: '1.74 MB',
+      sizeFormatted: '1.77 MB',
       sha256: null,
       available: true
     },
@@ -86,7 +86,7 @@
 
   const PLATFORM_NOTES = {
     windows: 'Portable Windows GUI executable. No installer required.',
-    macos: 'Native Apple Silicon (arm64) Mach-O executable.',
+    macos: 'macOS disk image (.dmg). Open the DMG and drag Stock Manager to Applications.',
     linux: 'x86-64 ELF binary. Run chmod +x before first launch.',
     android: 'Android APK package. Install directly on Android 5.0+ devices.'
   };
@@ -102,11 +102,11 @@
     },
     macos: {
       steps: [
-        [{ text: 'Download ' }, { strong: 'Stock_Manager_1-0_macOS' }, { text: ' (Apple Silicon arm64 binary).' }],
-        [{ text: 'Open Terminal in your Downloads folder, mark the binary as executable, and clear Gatekeeper quarantine attributes if needed.' }],
-        [{ text: 'Launch the application directly from Terminal or Finder.' }]
+        [{ text: 'Download ' }, { strong: 'Stock_Manager_1-0_macOS.dmg' }, { text: ' (macOS disk image).' }],
+        [{ text: 'Verify the SHA-256 checksum with ' }, { code: 'shasum -a 256 Stock_Manager_1-0_macOS.dmg' }, { text: ', then double-click the ' }, { code: '.dmg' }, { text: ' to mount it.' }],
+        [{ text: 'Drag ' }, { strong: 'Stock Manager' }, { text: ' into your ' }, { strong: 'Applications' }, { text: ' folder. If Gatekeeper prompts on first launch, right-click the app and choose ' }, { em: 'Open' }, { text: '.' }]
       ],
-      command: 'chmod +x ./Stock_Manager_1-0_macOS && xattr -d com.apple.quarantine ./Stock_Manager_1-0_macOS 2>/dev/null; ./Stock_Manager_1-0_macOS'
+      command: 'shasum -a 256 ./Stock_Manager_1-0_macOS.dmg && open ./Stock_Manager_1-0_macOS.dmg'
     },
     linux: {
       steps: [
