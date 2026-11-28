@@ -14,27 +14,32 @@ const RELEASE_CATALOG = [
     id: 'stock-manager-windows',
     appId: 'stock-manager',
     appName: 'Stock Manager',
-    version: '1.0',
+    version: '1.1',
     category: 'desktop',
     platform: 'Windows',
     platformKey: 'windows',
-    arch: 'x86-64 (64-bit)',
+    arch: 'Windows Setup (32/64-bit)',
     format: '.exe',
     mimeType: 'application/vnd.microsoft.portable-executable',
     filePaths: [
-      path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_Windows.exe'),
-      path.join(__dirname, 'Stock_Manager_1-0_Windows.exe')
+      path.join(__dirname, 'Stock_Manager', 'Stock-Manager-1.1-Windows-Setup.exe')
     ],
-    downloadName: 'Stock_Manager_1-0_Windows.exe',
-    downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Windows.exe',
-    legacyRoutes: ['/downloads/stock-manager/windows', '/stock_manager/Stock_Manager_1-0_Windows.exe', '/Stock_Manager_1-0_Windows.exe'],
-    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock_Manager_1-0_Windows.exe`
+    downloadName: 'Stock-Manager-1.1-Windows-Setup.exe',
+    downloadUrl: 'Stock_Manager/Stock-Manager-1.1-Windows-Setup.exe',
+    legacyRoutes: [
+      '/downloads/stock-manager/windows',
+      '/stock_manager/Stock-Manager-1.1-Windows-Setup.exe',
+      '/Stock_Manager/Stock_Manager_1-0_Windows.exe',
+      '/stock_manager/Stock_Manager_1-0_Windows.exe',
+      '/Stock_Manager_1-0_Windows.exe'
+    ],
+    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock-Manager-1.1-Windows-Setup.exe`
   },
   {
     id: 'stock-manager-macos',
     appId: 'stock-manager',
     appName: 'Stock Manager',
-    version: '1.0',
+    version: '1.1',
     category: 'desktop',
     platform: 'macOS',
     platformKey: 'macos',
@@ -42,42 +47,49 @@ const RELEASE_CATALOG = [
     format: '.dmg',
     mimeType: 'application/x-apple-diskimage',
     filePaths: [
-      path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_macOS.dmg')
+      path.join(__dirname, 'Stock_Manager', 'Stock-Manager-1.1-macOS.dmg')
     ],
-    downloadName: 'Stock_Manager_1-0_macOS.dmg',
-    downloadUrl: 'Stock_Manager/Stock_Manager_1-0_macOS.dmg',
+    downloadName: 'Stock-Manager-1.1-macOS.dmg',
+    downloadUrl: 'Stock_Manager/Stock-Manager-1.1-macOS.dmg',
     legacyRoutes: [
       '/downloads/stock-manager/macos',
+      '/stock_manager/Stock-Manager-1.1-macOS.dmg',
+      '/Stock_Manager/Stock_Manager_1-0_macOS.dmg',
       '/stock_manager/Stock_Manager_1-0_macOS.dmg',
       '/Stock_Manager/Stock_Manager_1-0_macOS',
       '/stock_manager/Stock_Manager_1-0_macOS'
     ],
-    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock_Manager_1-0_macOS.dmg`
+    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock-Manager-1.1-macOS.dmg`
   },
   {
     id: 'stock-manager-linux',
     appId: 'stock-manager',
     appName: 'Stock Manager',
-    version: '1.0',
+    version: '1.1',
     category: 'desktop',
     platform: 'Linux',
     platformKey: 'linux',
-    arch: 'x86-64 (GNU/Linux)',
-    format: 'ELF Executable',
-    mimeType: 'application/octet-stream',
+    arch: 'amd64 (Debian/Ubuntu)',
+    format: '.deb',
+    mimeType: 'application/vnd.debian.binary-package',
     filePaths: [
-      path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_Linux')
+      path.join(__dirname, 'Stock_Manager', 'Stock-Manager-1.1-Linux-amd64.deb')
     ],
-    downloadName: 'Stock_Manager_1-0_Linux',
-    downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Linux',
-    legacyRoutes: ['/downloads/stock-manager/linux', '/stock_manager/Stock_Manager_1-0_Linux'],
-    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock_Manager_1-0_Linux`
+    downloadName: 'Stock-Manager-1.1-Linux-amd64.deb',
+    downloadUrl: 'Stock_Manager/Stock-Manager-1.1-Linux-amd64.deb',
+    legacyRoutes: [
+      '/downloads/stock-manager/linux',
+      '/stock_manager/Stock-Manager-1.1-Linux-amd64.deb',
+      '/Stock_Manager/Stock_Manager_1-0_Linux',
+      '/stock_manager/Stock_Manager_1-0_Linux'
+    ],
+    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock-Manager-1.1-Linux-amd64.deb`
   },
   {
     id: 'stock-manager-android',
     appId: 'stock-manager',
     appName: 'Stock Manager',
-    version: '1.0',
+    version: '1.1',
     category: 'mobile',
     platform: 'Android',
     platformKey: 'android',
@@ -85,12 +97,17 @@ const RELEASE_CATALOG = [
     format: '.apk',
     mimeType: 'application/vnd.android.package-archive',
     filePaths: [
-      path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_Android.apk')
+      path.join(__dirname, 'Stock_Manager', 'Stock-Manager-1.1-Android.apk')
     ],
-    downloadName: 'Stock_Manager_1-0_Android.apk',
-    downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Android.apk',
-    legacyRoutes: ['/downloads/stock-manager/android', '/stock_manager/Stock_Manager_1-0_Android.apk'],
-    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock_Manager_1-0_Android.apk`
+    downloadName: 'Stock-Manager-1.1-Android.apk',
+    downloadUrl: 'Stock_Manager/Stock-Manager-1.1-Android.apk',
+    legacyRoutes: [
+      '/downloads/stock-manager/android',
+      '/stock_manager/Stock-Manager-1.1-Android.apk',
+      '/Stock_Manager/Stock_Manager_1-0_Android.apk',
+      '/stock_manager/Stock_Manager_1-0_Android.apk'
+    ],
+    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock-Manager-1.1-Android.apk`
   },
   {
     id: 'tchat-android',
@@ -174,7 +191,10 @@ async function getEntryMetadata(entry) {
   }
 
   try {
-    const headRes = await fetch(entry.remoteUrl, { method: 'HEAD' });
+    const headRes = await fetch(entry.remoteUrl, {
+      method: 'HEAD',
+      headers: { 'Accept-Encoding': 'identity' }
+    });
     if (headRes.ok) {
       const len = Number(headRes.headers.get('content-length')) || 0;
       const data = {
@@ -241,7 +261,10 @@ async function serveReleaseEntry(req, res, entry) {
 
   // Stream from GitHub Pages mirror when large file is absent from local container
   try {
-    const upstream = await fetch(entry.remoteUrl, { method: req.method === 'HEAD' ? 'HEAD' : 'GET' });
+    const upstream = await fetch(entry.remoteUrl, {
+      method: req.method === 'HEAD' ? 'HEAD' : 'GET',
+      headers: { 'Accept-Encoding': 'identity' }
+    });
     if (!upstream.ok) {
       return res.status(404).json({ error: `${entry.downloadName} was not found.` });
     }

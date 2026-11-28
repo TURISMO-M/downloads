@@ -6,15 +6,15 @@
       id: 'stock-manager-windows',
       appId: 'stock-manager',
       appName: 'Stock Manager',
-      version: '1.0',
+      version: '1.1',
       category: 'desktop',
       platform: 'Windows',
       platformKey: 'windows',
-      arch: 'x86-64 (64-bit)',
+      arch: 'Windows Setup (32/64-bit)',
       format: '.exe',
-      filename: 'Stock_Manager_1-0_Windows.exe',
-      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Windows.exe',
-      sizeFormatted: '1.31 MB',
+      filename: 'Stock-Manager-1.1-Windows-Setup.exe',
+      downloadUrl: 'Stock_Manager/Stock-Manager-1.1-Windows-Setup.exe',
+      sizeFormatted: '2.46 MB',
       sha256: null,
       available: true
     },
@@ -22,15 +22,15 @@
       id: 'stock-manager-macos',
       appId: 'stock-manager',
       appName: 'Stock Manager',
-      version: '1.0',
+      version: '1.1',
       category: 'desktop',
       platform: 'macOS',
       platformKey: 'macos',
       arch: 'Apple Silicon (arm64)',
       format: '.dmg',
-      filename: 'Stock_Manager_1-0_macOS.dmg',
-      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_macOS.dmg',
-      sizeFormatted: '982.4 KB',
+      filename: 'Stock-Manager-1.1-macOS.dmg',
+      downloadUrl: 'Stock_Manager/Stock-Manager-1.1-macOS.dmg',
+      sizeFormatted: '1.02 MB',
       sha256: null,
       available: true
     },
@@ -38,15 +38,15 @@
       id: 'stock-manager-linux',
       appId: 'stock-manager',
       appName: 'Stock Manager',
-      version: '1.0',
+      version: '1.1',
       category: 'desktop',
       platform: 'Linux',
       platformKey: 'linux',
-      arch: 'x86-64 (GNU/Linux)',
-      format: 'ELF Executable',
-      filename: 'Stock_Manager_1-0_Linux',
-      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Linux',
-      sizeFormatted: '1.77 MB',
+      arch: 'amd64 (Debian/Ubuntu)',
+      format: '.deb',
+      filename: 'Stock-Manager-1.1-Linux-amd64.deb',
+      downloadUrl: 'Stock_Manager/Stock-Manager-1.1-Linux-amd64.deb',
+      sizeFormatted: '848.7 KB',
       sha256: null,
       available: true
     },
@@ -54,15 +54,15 @@
       id: 'stock-manager-android',
       appId: 'stock-manager',
       appName: 'Stock Manager',
-      version: '1.0',
+      version: '1.1',
       category: 'mobile',
       platform: 'Android',
       platformKey: 'android',
       arch: 'Android APK',
       format: '.apk',
-      filename: 'Stock_Manager_1-0_Android.apk',
-      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Android.apk',
-      sizeFormatted: '15.21 MB',
+      filename: 'Stock-Manager-1.1-Android.apk',
+      downloadUrl: 'Stock_Manager/Stock-Manager-1.1-Android.apk',
+      sizeFormatted: '15.35 MB',
       sha256: null,
       available: true
     },
@@ -85,44 +85,44 @@
   ];
 
   const PLATFORM_NOTES = {
-    windows: 'Portable Windows GUI executable. No installer required.',
+    windows: 'Windows Setup installer (.exe). Run the installer to set up Stock Manager.',
     macos: 'macOS disk image (.dmg). Open the DMG and drag Stock Manager to Applications.',
-    linux: 'x86-64 ELF binary. Run chmod +x before first launch.',
+    linux: 'Debian/Ubuntu amd64 package (.deb). Install with apt or dpkg.',
     android: 'Android APK package. Install directly on Android 5.0+ devices.'
   };
 
   const INSTALL_GUIDES = {
     windows: {
       steps: [
-        [{ text: 'Download ' }, { strong: 'Stock_Manager_1-0_Windows.exe' }, { text: ' from the release panel above.' }],
-        [{ text: 'Verify the SHA-256 checksum in PowerShell with ' }, { code: 'Get-FileHash .\\Stock_Manager_1-0_Windows.exe -Algorithm SHA256' }, { text: '.' }],
-        [{ text: 'Double-click the executable to launch Stock Manager directly. If Windows SmartScreen prompts, choose ' }, { em: 'More info' }, { text: ' and ' }, { em: 'Run anyway' }, { text: '.' }]
+        [{ text: 'Download ' }, { strong: 'Stock-Manager-1.1-Windows-Setup.exe' }, { text: ' from the release panel above.' }],
+        [{ text: 'Verify the SHA-256 checksum in PowerShell with ' }, { code: 'Get-FileHash .\\Stock-Manager-1.1-Windows-Setup.exe -Algorithm SHA256' }, { text: '.' }],
+        [{ text: 'Run the Setup installer to install Stock Manager. If Windows SmartScreen prompts, choose ' }, { em: 'More info' }, { text: ' and ' }, { em: 'Run anyway' }, { text: '.' }]
       ],
-      command: 'Get-FileHash .\\Stock_Manager_1-0_Windows.exe -Algorithm SHA256'
+      command: 'Get-FileHash .\\Stock-Manager-1.1-Windows-Setup.exe -Algorithm SHA256'
     },
     macos: {
       steps: [
-        [{ text: 'Download ' }, { strong: 'Stock_Manager_1-0_macOS.dmg' }, { text: ' (macOS disk image).' }],
-        [{ text: 'Verify the SHA-256 checksum with ' }, { code: 'shasum -a 256 Stock_Manager_1-0_macOS.dmg' }, { text: ', then double-click the ' }, { code: '.dmg' }, { text: ' to mount it.' }],
+        [{ text: 'Download ' }, { strong: 'Stock-Manager-1.1-macOS.dmg' }, { text: ' (macOS disk image).' }],
+        [{ text: 'Verify the SHA-256 checksum with ' }, { code: 'shasum -a 256 Stock-Manager-1.1-macOS.dmg' }, { text: ', then double-click the ' }, { code: '.dmg' }, { text: ' to mount it.' }],
         [{ text: 'Drag ' }, { strong: 'Stock Manager' }, { text: ' into your ' }, { strong: 'Applications' }, { text: ' folder. If Gatekeeper prompts on first launch, right-click the app and choose ' }, { em: 'Open' }, { text: '.' }]
       ],
-      command: 'shasum -a 256 ./Stock_Manager_1-0_macOS.dmg && open ./Stock_Manager_1-0_macOS.dmg'
+      command: 'shasum -a 256 ./Stock-Manager-1.1-macOS.dmg && open ./Stock-Manager-1.1-macOS.dmg'
     },
     linux: {
       steps: [
-        [{ text: 'Download ' }, { strong: 'Stock_Manager_1-0_Linux' }, { text: ' (64-bit x86-64 ELF binary).' }],
-        [{ text: 'Verify the checksum with ' }, { code: 'sha256sum Stock_Manager_1-0_Linux' }, { text: ' and confirm ' }, { code: 'libcurl' }, { text: ' and OpenGL libraries are installed.' }],
-        [{ text: 'Grant execute permission and run the binary from your terminal.' }]
+        [{ text: 'Download ' }, { strong: 'Stock-Manager-1.1-Linux-amd64.deb' }, { text: ' (64-bit Debian/Ubuntu package).' }],
+        [{ text: 'Verify the checksum with ' }, { code: 'sha256sum Stock-Manager-1.1-Linux-amd64.deb' }, { text: '.' }],
+        [{ text: 'Install the package using ' }, { code: 'apt' }, { text: ' (or ' }, { code: 'dpkg' }, { text: ') and launch Stock Manager from your app menu or terminal.' }]
       ],
-      command: 'chmod +x ./Stock_Manager_1-0_Linux && ./Stock_Manager_1-0_Linux'
+      command: 'sudo apt install ./Stock-Manager-1.1-Linux-amd64.deb'
     },
     android: {
       steps: [
-        [{ text: 'Download the ' }, { strong: '.apk' }, { text: ' package (' }, { strong: 'Stock_Manager_1-0_Android.apk' }, { text: ' or ' }, { strong: 'TChat.apk' }, { text: ') onto your Android device.' }],
+        [{ text: 'Download the ' }, { strong: '.apk' }, { text: ' package (' }, { strong: 'Stock-Manager-1.1-Android.apk' }, { text: ' or ' }, { strong: 'TChat.apk' }, { text: ') onto your Android device.' }],
         [{ text: 'Open your device file manager, navigate to Downloads, and tap the APK file.' }],
         [{ text: 'If prompted, enable ' }, { em: 'Install from unknown sources' }, { text: ' for your browser or file manager, then tap ' }, { strong: 'Install' }, { text: '.' }]
       ],
-      command: 'adb install -r Stock_Manager_1-0_Android.apk'
+      command: 'adb install -r Stock-Manager-1.1-Android.apk'
     }
   };
 
