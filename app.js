@@ -15,7 +15,7 @@
       filename: 'Stock-Manager-1.1-Windows-Setup.exe',
       downloadUrl: 'Stock_Manager/Stock-Manager-1.1-Windows-Setup.exe',
       sizeFormatted: '2.46 MB',
-      sha256: null,
+      sha256: '27e201ffb9b9cb9fac3dd165f5b72c711732a5656389eb22dc013121f52b325d',
       available: true
     },
     {
@@ -31,7 +31,7 @@
       filename: 'Stock-Manager-1.1-macOS.dmg',
       downloadUrl: 'Stock_Manager/Stock-Manager-1.1-macOS.dmg',
       sizeFormatted: '1.02 MB',
-      sha256: null,
+      sha256: '7c7cdda6627c1da3a0118bd3a3486e750d1f79bfe8f13b60969e60786d7d069c',
       available: true
     },
     {
@@ -47,7 +47,7 @@
       filename: 'Stock-Manager-1.1-Linux-amd64.deb',
       downloadUrl: 'Stock_Manager/Stock-Manager-1.1-Linux-amd64.deb',
       sizeFormatted: '848.7 KB',
-      sha256: null,
+      sha256: '10c800bf0905f6e2e4313ea16757b3882bdac2c2d23d3761ba49aa67c3de128e',
       available: true
     },
     {
@@ -63,7 +63,7 @@
       filename: 'Stock-Manager-1.1-Android.apk',
       downloadUrl: 'Stock_Manager/Stock-Manager-1.1-Android.apk',
       sizeFormatted: '15.35 MB',
-      sha256: null,
+      sha256: '2bdce6df4e651f544b26048c6ca4f6c12aaa2725fd3a96660b73cadc0ae7be21',
       available: true
     },
     {
@@ -489,12 +489,17 @@
         try {
           const res = await fetch(item.downloadUrl, { method: 'HEAD', cache: 'no-store' });
           if (res.ok) {
-            const len = Number(res.headers.get('content-length')) || 0;
+            const encoding = res.headers.get('content-encoding');
+            const isUncompressed = !encoding || encoding === 'identity';
+            const len = isUncompressed ? (Number(res.headers.get('content-length')) || 0) : 0;
             return {
               ...item,
               sizeFormatted: len > 0 ? formatBytes(len) : item.sizeFormatted,
               available: true
             };
+          }
+          if (res.status === 405 || res.status === 501) {
+            return { ...item, available: true };
           }
           return { ...item, available: false };
         } catch {

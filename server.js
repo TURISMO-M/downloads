@@ -107,7 +107,8 @@ const RELEASE_CATALOG = [
       '/Stock_Manager/Stock_Manager_1-0_Android.apk',
       '/stock_manager/Stock_Manager_1-0_Android.apk'
     ],
-    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock-Manager-1.1-Android.apk`
+    remoteUrl: `${GITHUB_PAGES_BASE}/Stock_Manager/Stock-Manager-1.1-Android.apk`,
+    fallbackSha256: '2bdce6df4e651f544b26048c6ca4f6c12aaa2725fd3a96660b73cadc0ae7be21'
   },
   {
     id: 'tchat-android',
@@ -211,7 +212,7 @@ async function getEntryMetadata(entry) {
         downloadUrl: entry.downloadUrl,
         sizeBytes: len,
         sizeFormatted: len > 0 ? formatBytes(len) : 'Available',
-        sha256: null,
+        sha256: entry.fallbackSha256 || null,
         updatedAt: headRes.headers.get('last-modified') || null,
         source: 'mirror',
         available: true
@@ -315,9 +316,17 @@ app.use((req, res, next) => {
   return next();
 });
 
-app.use(express.static(__dirname, { dotfiles: 'ignore' }));
+app.use(express.static(__dirname, {
+  dotfiles: 'ignore',
+  setHeaders: (res, filePath) => {
+    if (/\.(html|js|css)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-store');
+    }
+  }
+}));
 
 app.get('/', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
