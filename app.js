@@ -13,7 +13,7 @@
       arch: 'x86-64 (64-bit)',
       format: '.exe',
       filename: 'Stock_Manager_1-0_Windows.exe',
-      downloadUrl: '/downloads/stock-manager/windows',
+      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Windows.exe',
       sizeFormatted: '1.26 MB',
       sha256: null,
       available: true
@@ -29,7 +29,7 @@
       arch: 'Apple Silicon (arm64)',
       format: 'Mach-O Binary',
       filename: 'Stock_Manager_1-0_macOS',
-      downloadUrl: '/downloads/stock-manager/macos',
+      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_macOS',
       sizeFormatted: '1.33 MB',
       sha256: null,
       available: true
@@ -45,7 +45,7 @@
       arch: 'x86-64 (GNU/Linux)',
       format: 'ELF Executable',
       filename: 'Stock_Manager_1-0_Linux',
-      downloadUrl: '/downloads/stock-manager/linux',
+      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Linux',
       sizeFormatted: '1.74 MB',
       sha256: null,
       available: true
@@ -61,10 +61,10 @@
       arch: 'Android APK',
       format: '.apk',
       filename: 'Stock_Manager_1-0_Android.apk',
-      downloadUrl: '/downloads/stock-manager/android',
-      sizeFormatted: 'Not uploaded',
+      downloadUrl: 'Stock_Manager/Stock_Manager_1-0_Android.apk',
+      sizeFormatted: '15.21 MB',
       sha256: null,
-      available: false
+      available: true
     },
     {
       id: 'tchat-android',
@@ -77,7 +77,7 @@
       arch: 'Android 5.0+ (API 21)',
       format: '.apk',
       filename: 'TChat.apk',
-      downloadUrl: '/downloads/tchat/android',
+      downloadUrl: 'TChat/tchat.apk',
       sizeFormatted: 'Available',
       sha256: null,
       available: true
@@ -140,6 +140,15 @@
     return 'windows';
   }
 
+  function formatBytes(bytes) {
+    if (!Number.isFinite(bytes) || bytes < 0) return '0 B';
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    const mb = kb / 1024;
+    return `${mb.toFixed(2)} MB`;
+  }
+
   function showToast(message) {
     const toast = document.getElementById('copy-toast');
     if (!toast) return;
@@ -152,7 +161,7 @@
   }
 
   async function copyText(text, label) {
-    if (!text || text === 'Unavailable' || text === 'Loading checksum...') {
+    if (!text || text === 'Unavailable' || text === 'Checking checksum...' || text === 'Direct static file') {
       showToast('Nothing available to copy yet');
       return;
     }
@@ -173,7 +182,15 @@
     }
   }
 
-  // Same-origin fetch -> Blob download prevents Chrome iframe download failures
+  // Inside preview iframes, fetch+Blob keeps session cookies intact; top-level uses native download
+  function isInIframe() {
+    try {
+      return window.self !== window.top;
+    } catch {
+      return true;
+    }
+  }
+
   async function triggerSafeDownload(anchor) {
     if (anchor.classList.contains('is-disabled')) return;
     const url = anchor.getAttribute('href');
@@ -204,8 +221,14 @@
       setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
       showToast(`Started download: ${filename}`);
     } catch (err) {
-      console.error('Download error:', err);
-      showToast(`${filename} is not available on the server yet`);
+      console.error('Iframe fetch download failed, falling back to direct link:', err);
+      const direct = document.createElement('a');
+      direct.href = url;
+      direct.download = filename;
+      direct.style.display = 'none';
+      document.body.appendChild(direct);
+      direct.click();
+      document.body.removeChild(direct);
     } finally {
       anchor.classList.remove('is-downloading');
       if (labelSpan && anchor.classList.contains('btn-primary')) {
@@ -273,7 +296,11 @@
     if (filenameEl) filenameEl.textContent = build.filename;
     if (archEl) archEl.textContent = `${build.arch} · ${build.format}`;
     if (sizeEl) sizeEl.textContent = build.sizeFormatted;
-    if (hashEl) hashEl.textContent = build.sha256 || (build.available ? 'Unavailable' : 'Awaiting upload');
+    if (hashEl) {
+      hashEl.textContent = build.sha256 || (build.available ? 'Direct static file' : 'Unavailable');
+      const copyBtn = hashEl.parentElement ? hashEl.parentElement.querySelector('.copy-btn') : null;
+      if (copyBtn) copyBtn.hidden = !build.sha256;
+    }
 
     if (btnEl) {
       btnEl.setAttribute('href', build.downloadUrl);
@@ -284,12 +311,12 @@
     if (btnLabelEl) {
       btnLabelEl.textContent = build.available
         ? `Download for ${build.platform}`
-        : `${build.filename} Not Uploaded`;
+        : `${build.filename} Unavailable`;
     }
     if (noteEl) {
       noteEl.textContent = build.available
         ? (PLATFORM_NOTES[build.platformKey] || '')
-        : `${build.filename} was not found in /Stock_Manager/. Upload it to enable this download.`;
+        : `${build.filename} could not be reached.`;
     }
 
     document.querySelectorAll('.os-tab').forEach((tab) => {
@@ -308,8 +335,13 @@
     const btnEl = document.getElementById('tchat-download-btn');
 
     if (sizeEl) sizeEl.textContent = tchat.sizeFormatted;
-    if (hashEl) hashEl.textContent = tchat.sha256 || 'Unavailable';
+    if (hashEl) {
+      hashEl.textContent = tchat.sha256 || (tchat.available ? 'Direct static file' : 'Unavailable');
+      const copyBtn = hashEl.parentElement ? hashEl.parentElement.querySelector('.copy-btn') : null;
+      if (copyBtn) copyBtn.hidden = !tchat.sha256;
+    }
     if (btnEl) {
+      btnEl.setAttribute('href', tchat.downloadUrl);
       btnEl.classList.toggle('is-disabled', !tchat.available);
       btnEl.setAttribute('aria-disabled', String(!tchat.available));
     }
@@ -371,7 +403,7 @@
       code.className = 'mono';
       code.textContent = item.sha256
         ? `${item.sha256.slice(0, 14)}…`
-        : (item.available ? 'Unavailable' : 'Awaiting file');
+        : (item.available ? 'Verified static' : 'Unavailable');
       if (item.sha256) {
         code.title = item.sha256;
       }
@@ -451,18 +483,48 @@
     });
   }
 
+  async function probeStaticFiles() {
+    const updated = await Promise.all(
+      FALLBACK_RELEASES.map(async (item) => {
+        try {
+          const res = await fetch(item.downloadUrl, { method: 'HEAD', cache: 'no-store' });
+          if (res.ok) {
+            const len = Number(res.headers.get('content-length')) || 0;
+            return {
+              ...item,
+              sizeFormatted: len > 0 ? formatBytes(len) : item.sizeFormatted,
+              available: true
+            };
+          }
+          return { ...item, available: false };
+        } catch {
+          return item;
+        }
+      })
+    );
+    releases = updated;
+  }
+
   async function loadReleases() {
+    let loadedFromApi = false;
     try {
-      const response = await fetch('/api/releases', { cache: 'no-store' });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+      const response = await fetch('api/releases', { cache: 'no-store' });
+      if (response.ok) {
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const payload = await response.json();
+          if (Array.isArray(payload.releases) && payload.releases.length > 0) {
+            releases = payload.releases;
+            loadedFromApi = true;
+          }
+        }
       }
-      const payload = await response.json();
-      if (Array.isArray(payload.releases) && payload.releases.length > 0) {
-        releases = payload.releases;
-      }
-    } catch (err) {
-      console.warn('Failed to load live /api/releases metadata, using fallback catalog:', err);
+    } catch {
+      // Static host (e.g., GitHub Pages) has no /api/releases backend
+    }
+
+    if (!loadedFromApi) {
+      await probeStaticFiles();
     }
 
     updateHeroCta();
@@ -515,12 +577,18 @@
       });
     });
 
-    // Event delegation for all download links (handles static + dynamically rendered manifest links)
+    // Inside preview iframe, intercept downloads via fetch+Blob; on standalone static hosts let native download run
     document.addEventListener('click', (event) => {
       const anchor = event.target.closest('a[download]');
       if (!anchor) return;
-      event.preventDefault();
-      triggerSafeDownload(anchor);
+      if (anchor.classList.contains('is-disabled')) {
+        event.preventDefault();
+        return;
+      }
+      if (isInIframe()) {
+        event.preventDefault();
+        triggerSafeDownload(anchor);
+      }
     });
 
     const refreshBtn = document.getElementById('refresh-manifest-btn');
