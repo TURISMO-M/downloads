@@ -18,6 +18,7 @@ const RELEASE_CATALOG = [
     platformKey: 'windows',
     arch: 'x86-64 (64-bit)',
     format: '.exe',
+    mimeType: 'application/vnd.microsoft.portable-executable',
     filePath: path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_Windows.exe'),
     downloadName: 'Stock_Manager_1-0_Windows.exe',
     downloadUrl: '/downloads/stock-manager/windows',
@@ -33,6 +34,7 @@ const RELEASE_CATALOG = [
     platformKey: 'macos',
     arch: 'Apple Silicon (arm64)',
     format: 'Mach-O Binary',
+    mimeType: 'application/octet-stream',
     filePath: path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_macOS'),
     downloadName: 'Stock_Manager_1-0_macOS',
     downloadUrl: '/downloads/stock-manager/macos',
@@ -48,10 +50,27 @@ const RELEASE_CATALOG = [
     platformKey: 'linux',
     arch: 'x86-64 (GNU/Linux)',
     format: 'ELF Executable',
+    mimeType: 'application/octet-stream',
     filePath: path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_Linux'),
     downloadName: 'Stock_Manager_1-0_Linux',
     downloadUrl: '/downloads/stock-manager/linux',
     directPath: '/Stock_Manager/Stock_Manager_1-0_Linux'
+  },
+  {
+    id: 'stock-manager-android',
+    appId: 'stock-manager',
+    appName: 'Stock Manager',
+    version: '1.0',
+    category: 'mobile',
+    platform: 'Android',
+    platformKey: 'android',
+    arch: 'Android APK',
+    format: '.apk',
+    mimeType: 'application/vnd.android.package-archive',
+    filePath: path.join(__dirname, 'Stock_Manager', 'Stock_Manager_1-0_Android.apk'),
+    downloadName: 'Stock_Manager_1-0_Android.apk',
+    downloadUrl: '/downloads/stock-manager/android',
+    directPath: '/Stock_Manager/Stock_Manager_1-0_Android.apk'
   },
   {
     id: 'tchat-android',
@@ -63,6 +82,7 @@ const RELEASE_CATALOG = [
     platformKey: 'android',
     arch: 'Android 5.0+ (API 21)',
     format: '.apk',
+    mimeType: 'application/vnd.android.package-archive',
     filePath: path.join(__dirname, 'TChat', 'tchat.apk'),
     downloadName: 'TChat.apk',
     downloadUrl: '/downloads/tchat/android',
@@ -103,7 +123,7 @@ function computeFileMetadata(entry) {
       updatedAt: stat.mtime.toISOString(),
       available: true
     };
-  } catch (err) {
+  } catch {
     return {
       id: entry.id,
       appId: entry.appId,
@@ -118,7 +138,7 @@ function computeFileMetadata(entry) {
       downloadUrl: entry.downloadUrl,
       directPath: entry.directPath,
       sizeBytes: 0,
-      sizeFormatted: 'Unavailable',
+      sizeFormatted: 'Not uploaded',
       sha256: null,
       updatedAt: null,
       available: false
@@ -139,42 +159,46 @@ function getReleasesMetadata() {
       cachedMetadata.set(entry.id, { mtimeMs: stat.mtimeMs, sizeBytes: stat.size, data });
       return data;
     } catch {
+      cachedMetadata.delete(entry.id);
       return computeFileMetadata(entry);
     }
   });
 }
 
-// Live release manifest API with real file sizes and SHA-256 hashes
+function sendBinaryFile(res, filePath, downloadName, mimeType) {
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: `${downloadName} was not found on the server.` });
+  }
+  const stat = fs.statSync(filePath);
+  res.setHeader('Content-Type', mimeType || 'application/octet-stream');
+  res.setHeader('Content-Length', String(stat.size));
+  res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  return fs.createReadStream(filePath).pipe(res);
+}
+
 app.get('/api/releases', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
   res.json({
     publisher: 'TURISMO-M',
     releases: getReleasesMetadata()
   });
 });
 
-// Dedicated attachment download routes for every uploaded release binary
 for (const entry of RELEASE_CATALOG) {
-  app.get(entry.downloadUrl, (req, res) => {
-    if (!fs.existsSync(entry.filePath)) {
-      return res.status(404).send('Release file not found');
-    }
-    return res.download(entry.filePath, entry.downloadName);
+  app.get(entry.downloadUrl, (_req, res) => {
+    return sendBinaryFile(res, entry.filePath, entry.downloadName, entry.mimeType);
   });
 }
 
-// Backward-compatible APK paths
 app.get(['/TChat.apk', '/tchat.apk'], (_req, res) => {
   const apkPath = path.join(__dirname, 'TChat', 'tchat.apk');
-  if (!fs.existsSync(apkPath)) {
-    return res.status(404).send('TChat.apk not found');
-  }
-  return res.download(apkPath, 'TChat.apk');
+  return sendBinaryFile(res, apkPath, 'TChat.apk', 'application/vnd.android.package-archive');
 });
 
-// Serve generated assets under /src
 app.use('/src', express.static(path.join(__dirname, 'src'), { dotfiles: 'ignore' }));
 
-// Prevent exposing server/package internals while serving static files
 app.use((req, res, next) => {
   const blocked = new Set([
     '/server.js',

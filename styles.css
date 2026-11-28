@@ -237,6 +237,23 @@ button:focus-visible {
   transform: translateY(0);
 }
 
+.btn-primary.is-disabled {
+  background-color: var(--bg-surface-elevated);
+  color: var(--text-muted);
+  border-color: var(--border-hairline);
+  pointer-events: none;
+}
+
+.btn-primary.is-downloading {
+  opacity: 0.82;
+  pointer-events: wait;
+}
+
+.inline-download-link.is-disabled {
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
 .btn-full {
   width: 100%;
 }

@@ -30,7 +30,7 @@
       format: 'Mach-O Binary',
       filename: 'Stock_Manager_1-0_macOS',
       downloadUrl: '/downloads/stock-manager/macos',
-      sizeFormatted: '1.35 MB',
+      sizeFormatted: '1.33 MB',
       sha256: null,
       available: true
     },
@@ -49,6 +49,22 @@
       sizeFormatted: '1.74 MB',
       sha256: null,
       available: true
+    },
+    {
+      id: 'stock-manager-android',
+      appId: 'stock-manager',
+      appName: 'Stock Manager',
+      version: '1.0',
+      category: 'mobile',
+      platform: 'Android',
+      platformKey: 'android',
+      arch: 'Android APK',
+      format: '.apk',
+      filename: 'Stock_Manager_1-0_Android.apk',
+      downloadUrl: '/downloads/stock-manager/android',
+      sizeFormatted: 'Not uploaded',
+      sha256: null,
+      available: false
     },
     {
       id: 'tchat-android',
@@ -71,7 +87,8 @@
   const PLATFORM_NOTES = {
     windows: 'Portable Windows GUI executable. No installer required.',
     macos: 'Native Apple Silicon (arm64) Mach-O executable.',
-    linux: 'x86-64 ELF binary. Run chmod +x before first launch.'
+    linux: 'x86-64 ELF binary. Run chmod +x before first launch.',
+    android: 'Android APK package. Install directly on Android 5.0+ devices.'
   };
 
   const INSTALL_GUIDES = {
@@ -101,19 +118,16 @@
     },
     android: {
       steps: [
-        [{ text: 'Download ' }, { strong: 'TChat.apk' }, { text: ' directly onto your Android device (Android 5.0 / API 21 or newer).' }],
-        [{ text: 'Open your device file manager, navigate to Downloads, and tap ' }, { strong: 'TChat.apk' }, { text: '.' }],
+        [{ text: 'Download the ' }, { strong: '.apk' }, { text: ' package (' }, { strong: 'Stock_Manager_1-0_Android.apk' }, { text: ' or ' }, { strong: 'TChat.apk' }, { text: ') onto your Android device.' }],
+        [{ text: 'Open your device file manager, navigate to Downloads, and tap the APK file.' }],
         [{ text: 'If prompted, enable ' }, { em: 'Install from unknown sources' }, { text: ' for your browser or file manager, then tap ' }, { strong: 'Install' }, { text: '.' }]
       ],
-      command: 'adb install -r TChat.apk'
+      command: 'adb install -r Stock_Manager_1-0_Android.apk'
     }
   };
 
   let releases = FALLBACK_RELEASES.slice();
   let activeStockOs = detectUserOs();
-  if (activeStockOs === 'android') {
-    activeStockOs = 'windows';
-  }
   let toastTimer = null;
 
   function detectUserOs() {
@@ -134,7 +148,7 @@
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toast.classList.remove('is-visible');
-    }, 2000);
+    }, 2400);
   }
 
   async function copyText(text, label) {
@@ -156,6 +170,47 @@
       document.execCommand('copy');
       document.body.removeChild(textarea);
       showToast(label || 'Copied to clipboard');
+    }
+  }
+
+  // Same-origin fetch -> Blob download prevents Chrome iframe download failures
+  async function triggerSafeDownload(anchor) {
+    if (anchor.classList.contains('is-disabled')) return;
+    const url = anchor.getAttribute('href');
+    const filename = anchor.getAttribute('download') || 'download';
+    if (!url || url.startsWith('#')) return;
+
+    const labelSpan = anchor.querySelector('span:last-child');
+    const originalText = labelSpan ? labelSpan.textContent : anchor.textContent;
+    anchor.classList.add('is-downloading');
+    if (labelSpan && anchor.classList.contains('btn-primary')) {
+      labelSpan.textContent = 'Downloading...';
+    }
+
+    try {
+      const response = await fetch(url, { credentials: 'same-origin' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const tempLink = document.createElement('a');
+      tempLink.href = blobUrl;
+      tempLink.download = filename;
+      tempLink.style.display = 'none';
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      showToast(`Started download: ${filename}`);
+    } catch (err) {
+      console.error('Download error:', err);
+      showToast(`${filename} is not available on the server yet`);
+    } finally {
+      anchor.classList.remove('is-downloading');
+      if (labelSpan && anchor.classList.contains('btn-primary')) {
+        labelSpan.textContent = originalText;
+      }
     }
   }
 
@@ -183,17 +238,21 @@
     if (!heroBtn || !heroLabel) return;
 
     if (detected === 'android') {
+      const stockAndroid = getReleaseByPlatform('stock-manager', 'android');
       const tchat = getReleaseByPlatform('tchat', 'android');
-      if (tchat) {
-        heroBtn.setAttribute('href', tchat.downloadUrl);
-        heroBtn.setAttribute('download', tchat.filename);
-        heroLabel.textContent = 'Download TChat for Android';
+      const target = stockAndroid && stockAndroid.available ? stockAndroid : tchat;
+      if (target) {
+        heroBtn.setAttribute('href', target.downloadUrl);
+        heroBtn.setAttribute('download', target.filename);
+        heroBtn.classList.toggle('is-disabled', !target.available);
+        heroLabel.textContent = `Download ${target.appName} for Android`;
       }
     } else {
       const build = getReleaseByPlatform('stock-manager', detected) || getReleaseByPlatform('stock-manager', 'windows');
       if (build) {
         heroBtn.setAttribute('href', build.downloadUrl);
         heroBtn.setAttribute('download', build.filename);
+        heroBtn.classList.toggle('is-disabled', !build.available);
         heroLabel.textContent = `Download Stock Manager for ${build.platform}`;
       }
     }
@@ -214,13 +273,24 @@
     if (filenameEl) filenameEl.textContent = build.filename;
     if (archEl) archEl.textContent = `${build.arch} · ${build.format}`;
     if (sizeEl) sizeEl.textContent = build.sizeFormatted;
-    if (hashEl) hashEl.textContent = build.sha256 || 'Unavailable';
+    if (hashEl) hashEl.textContent = build.sha256 || (build.available ? 'Unavailable' : 'Awaiting upload');
+
     if (btnEl) {
       btnEl.setAttribute('href', build.downloadUrl);
       btnEl.setAttribute('download', build.filename);
+      btnEl.classList.toggle('is-disabled', !build.available);
+      btnEl.setAttribute('aria-disabled', String(!build.available));
     }
-    if (btnLabelEl) btnLabelEl.textContent = `Download for ${build.platform}`;
-    if (noteEl) noteEl.textContent = PLATFORM_NOTES[build.platformKey] || '';
+    if (btnLabelEl) {
+      btnLabelEl.textContent = build.available
+        ? `Download for ${build.platform}`
+        : `${build.filename} Not Uploaded`;
+    }
+    if (noteEl) {
+      noteEl.textContent = build.available
+        ? (PLATFORM_NOTES[build.platformKey] || '')
+        : `${build.filename} was not found in /Stock_Manager/. Upload it to enable this download.`;
+    }
 
     document.querySelectorAll('.os-tab').forEach((tab) => {
       const isSelected = tab.dataset.os === activeStockOs;
@@ -235,12 +305,26 @@
 
     const sizeEl = document.getElementById('tchat-size');
     const hashEl = document.getElementById('tchat-hash');
+    const btnEl = document.getElementById('tchat-download-btn');
 
     if (sizeEl) sizeEl.textContent = tchat.sizeFormatted;
     if (hashEl) hashEl.textContent = tchat.sha256 || 'Unavailable';
+    if (btnEl) {
+      btnEl.classList.toggle('is-disabled', !tchat.available);
+      btnEl.setAttribute('aria-disabled', String(!tchat.available));
+    }
   }
 
-  function updateQuickSizes() {
+  function updateQuickLinks() {
+    document.querySelectorAll('[data-release-link]').forEach((link) => {
+      const id = link.getAttribute('data-release-link');
+      const match = releases.find((r) => r.id === id);
+      if (match) {
+        link.classList.toggle('is-disabled', !match.available);
+        link.setAttribute('aria-disabled', String(!match.available));
+      }
+    });
+
     document.querySelectorAll('[data-size-for]').forEach((el) => {
       const id = el.getAttribute('data-size-for');
       const match = releases.find((r) => r.id === id);
@@ -285,7 +369,9 @@
       hashWrap.className = 'hash-cell';
       const code = document.createElement('code');
       code.className = 'mono';
-      code.textContent = item.sha256 ? `${item.sha256.slice(0, 14)}…` : 'Unavailable';
+      code.textContent = item.sha256
+        ? `${item.sha256.slice(0, 14)}…`
+        : (item.available ? 'Unavailable' : 'Awaiting file');
       if (item.sha256) {
         code.title = item.sha256;
       }
@@ -309,6 +395,7 @@
       link.className = item.available ? 'table-download-link' : 'table-download-link is-disabled';
       link.href = item.downloadUrl;
       link.setAttribute('download', item.filename);
+      link.setAttribute('aria-disabled', String(!item.available));
       link.textContent = item.available ? 'Download' : 'Missing';
       actionTd.appendChild(link);
 
@@ -381,7 +468,7 @@
     updateHeroCta();
     renderStockManagerPanel();
     renderTChatPanel();
-    updateQuickSizes();
+    updateQuickLinks();
     renderManifestTable();
   }
 
@@ -402,8 +489,14 @@
           item.setAttribute('aria-selected', String(isSelected));
         });
         document.querySelectorAll('.release-card').forEach((card) => {
-          const matches = filter === 'all' || card.dataset.category === filter;
+          const cardCat = card.dataset.category;
+          const isStockManager = card.id === 'stock-manager';
+          const matches = filter === 'all' || cardCat === filter || (filter === 'mobile' && isStockManager);
           card.classList.toggle('is-hidden', !matches);
+          if (filter === 'mobile' && isStockManager) {
+            activeStockOs = 'android';
+            renderStockManagerPanel();
+          }
         });
       });
     });
@@ -420,6 +513,14 @@
         const targetEl = targetId ? document.getElementById(targetId) : null;
         copyText(targetEl ? targetEl.textContent.trim() : '');
       });
+    });
+
+    // Event delegation for all download links (handles static + dynamically rendered manifest links)
+    document.addEventListener('click', (event) => {
+      const anchor = event.target.closest('a[download]');
+      if (!anchor) return;
+      event.preventDefault();
+      triggerSafeDownload(anchor);
     });
 
     const refreshBtn = document.getElementById('refresh-manifest-btn');
